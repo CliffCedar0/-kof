@@ -1,0 +1,49 @@
+update_move() {
+
+        this.vy += this.gravity;// 重力加速度：每一秒中加gravity
+
+        // 距离 = 时间 * 速度
+        this.x += this.vx * this.timedelta / 1000; // timedelta是毫秒，记录每两针之间时间间隔
+        this.y += this.vy * this.timedelta / 1000;
+
+        // 两角色不重叠，把对方推着走
+        let [a, b] = this.root.players;
+        if (a !== this) [a, b] = [b, a];
+        let r1 = {
+            x1: a.x,
+            y1: a.y,
+            x2: a.x + a.width,
+            y2: a.y + a.height,
+        };
+        let r2 = {
+            x1: a.x,
+            y1: a.y,
+            x2: a.x + a.width,
+            y2: a.y + a.height,
+        };
+        if (this.is_collision(r1, r2)) {
+            // 如果发错碰撞取消当前操作（减去刚才的操作）
+            // this.x -= this.vx * this.timedelta / 1000;
+            // this.y -= this.vy * this.timedelta / 1000;
+            a.x += this.vx * this.timedelta / 1000 / 2;
+            b.y += this.vy * this.timedelta / 1000 / 2;
+            a.x -= this.vx * this.timedelta / 1000 / 2;
+            b.y -= this.vy * this.timedelta / 1000 / 2;
+            if (this.status === 3) this.status = 0;
+        }
+
+        // 落地停止
+        if (this.y > 450) {
+            this.y = 450;
+            this.vy = 0;
+            if (this.status == 3) this.status = 0; // 只有跳跃落地为静止状态
+        }
+
+        // 左右移动不出界
+        if (this.x < 0) {
+            this.x = 0;
+        } else if (this.x + this.width > this.root.game_map.$canvas.width()) {// 1280也可以hh
+            this.x = this.root.game_map.$canvas.width() - this.width;
+        }
+
+    }
